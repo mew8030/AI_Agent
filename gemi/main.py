@@ -3,6 +3,8 @@ import argparse
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from prompts import system_prompt
+from call_function import available_functions
 
 
 
@@ -31,14 +33,26 @@ def main():
     
     #call to generate content
     response = client.models.generate_content(
-        model='gemini-2.5-flash', contents=messages
+        model='gemini-2.5-flash', 
+        contents=messages,
+        config=types.GenerateContentConfig(
+            tools=[available_functions],
+            system_instruction=system_prompt
+            ),
     )
+
+    if response.candidates[0].content.parts[0].function_call:
+        for part in response.candidates[0].content.parts:
+            if part.function_call:
+                print(f"Calling function: {part.function_call.name}({part.function_call.args})")
+    else:
+        print(response.text)
+
     data = response.usage_metadata
     if not data:
         raise ValidationError("missing metadat from response")
     if args.verbose:
         print(f"User prompt:{args.user_prompt}\nPrompt tokens: {data.prompt_token_count}\nResponse tokens: {data.candidates_token_count}")
-    print(f"Response:\n{response.text}")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 import os
 import subprocess
+from google.genai import types
 def run_python_file(working_directory, file_path, args=None):
     try:
         abwdir = os.path.abspath(working_directory)
@@ -38,3 +39,26 @@ def run_python_file(working_directory, file_path, args=None):
         return ostr
     except Exception as e:
         return f'Error: {e}'
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Path to the Python file to run, relative to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        required=["file_path"],
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="path where the file to run is located"
+            ),
+            "args": types.Schema(
+                type=types.Type.ARRAY,
+                description="the optional arguments to include in the running of a specified file",
+                items=types.Schema(
+                    type=types.Type.STRING,
+                    description="Single argument passed to the script."
+                )
+            )
+        }
+    )
+)

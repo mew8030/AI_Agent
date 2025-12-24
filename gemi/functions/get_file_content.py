@@ -1,5 +1,6 @@
 import os
 from config import LIMIT
+from google.genai import types
 def get_file_content(working_directory, file_path):
     try:
         abwdir = os.path.abspath(working_directory)
@@ -21,3 +22,18 @@ def get_file_content(working_directory, file_path):
         return content
     except Exception as e:
         return f"    Error: {e}"
+
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Read file contents from a specified file in the allowed directory",
+    parameters=types.Schema(
+        required=["file_path"],
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="Directory path to find specified file from"
+            ),
+        },
+    ),
+)
